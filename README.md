@@ -1,3 +1,5 @@
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new?templateId=ORctok&envs=JAWDAH_HOST,JAWDAH_PORT,JAWDAH_DATA_DIR&optionalEnvs=JAWDAH_DB_PATH&JAWDAH_HOSTDefault=0.0.0.0&JAWDAH_PORTDefault=8080&JAWDAH_DATA_DIRDefault=/var/data&JAWDAH_DB_PATHDefault=/var/data/jawdah.sqlite3&repo=https://github.com/walednajjar2-salam/launch-quality26)
+
 # Launch Quality LLC - Real Estate & Hospitality Management System
 
 ## نظام إدارة العقارات والضيافة
@@ -66,6 +68,9 @@ SQLite database with 20+ tables:
 
 ### Deployment
 
+**One-Click Deploy to Railway:** Click the button at the top ☝️
+
+**Or manually:**
 - **Railway**: `python server.py`
 - **Docker**: `docker-compose up`
 - **Render**: See render.yaml
