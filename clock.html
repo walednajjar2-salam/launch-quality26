@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>الساعة الرقمية متعددة المناطق الزمنية</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+
+    .clocks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    .clock-card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+
+    .clock-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+    }
+
+    .clock-card.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .timezone-name {
+      font-size: 1.3em;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #667eea;
+    }
+
+    .clock-card.active .timezone-name {
+      color: white;
+    }
+
+    .digital-time {
+      font-size: 3em;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+      margin-bottom: 10px;
+      letter-spacing: 2px;
+      color: #667eea;
+    }
+
+    .clock-card.active .digital-time {
+      color: #fff;
+      text-shadow: 0 0 20px rgba(255,255,255,0.5);
+    }
+
+    .time-details {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 15px;
+      line-height: 1.8;
+    }
+
+    .clock-card.active .time-details {
+      color: rgba(255,255,255,0.9);
+    }
+
+    .analog-clock {
+      width: 150px;
+      height: 150px;
+      border: 3px solid #667eea;
+      border-radius: 50%;
+      position: relative;
+      margin: 20px auto;
+      background: #f8f9fa;
+    }
+
+    .clock-card.active .analog-clock {
+      border-color: white;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .clock-center {
+      width: 12px;
+      height: 12px;
+      background: #667eea;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    .clock-card.active .clock-center {
+      background: white;
+    }
+
+    .hand {
+      position: absolute;
+      bottom: 50%;
+      left: 50%;
+      transform-origin: bottom center;
+      background: #667eea;
+      border-radius: 10px;
+    }
+
+    .clock-card.active .hand {
+      background: white;
+    }
+
+    .hour-hand {
+      width: 4px;
+      height: 40px;
+      margin-left: -2px;
+    }
+
+    .minute-hand {
+      width: 3px;
+      height: 55px;
+      margin-left: -1.5px;
+    }
+
+    .second-hand {
+      width: 2px;
+      height: 60px;
+      margin-left: -1px;
+      background: #ff6b6b;
+    }
+
+    .clock-card.active .second-hand {
+      background: #ffeb3b;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: bold;
+      background: white;
+      color: #667eea;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+
+    .btn.active {
+      background: #667eea;
+      color: white;
+    }
+
+    .format-toggle {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .format-btn {
+      padding: 10px 20px;
+      border: 2px solid white;
+      background: transparent;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .format-btn.active {
+      background: white;
+      color: #667eea;
+    }
+
+    .stats {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 15px;
+      border-left: 4px solid #667eea;
+    }
+
+    .stat-label {
+      font-size: 0.9em;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: 1.8em;
+      font-weight: bold;
+      color: #667eea;
+      font-family: 'Courier New', monospace;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 1.8em;
+      }
+
+      .digital-time {
+        font-size: 2em;
+      }
+
+      .clocks-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+    }
+
+    .timezone-offset {
+      font-size: 0.85em;
+      color: #999;
+      margin-top: 5px;
+    }
+
+    .clock-card.active .timezone-offset {
+      color: rgba(255,255,255,0.7);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⏰ الساعة العالمية</h1>
+      <p>شاهد الوقت الحالي في مناطق زمنية مختلفة حول العالم</p>
+    </div>
+
+    <div class="format-toggle">
+      <button class="format-btn active" onclick="setFormat('24')">24 ساعة</button>
+      <button class="format-btn" onclick="setFormat('12')">12 ساعة</button>
+    </div>
+
+    <div class="controls">
+      <button class="btn active" onclick="filterTimezones('all')">الكل</button>
+      <button class="btn" onclick="filterTimezones('asia')">آسيا</button>
+      <button class="btn" onclick="filterTimezones('europe')">أوروبا</button>
+      <button class="btn" onclick="filterTimezones('americas')">الأمريكتان</button>
+      <button class="btn" onclick="filterTimezones('middle-east')">الشرق الأوسط</button>
+    </div>
+
+    <div class="clocks-grid" id="clocksGrid"></div>
+
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-label">الوقت المحلي</div>
+        <div class="stat-value" id="localTime">00:00:00</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">التاريخ</div>
+        <div class="stat-value" id="dateDisplay">2026-06-09</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">المنطقة الزمنية الحالية</div>
+        <div class="stat-value" id="currentTimezone">UTC</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">الفرق عن UTC</div>
+        <div class="stat-value" id="utcOffset">+00:00</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // قائمة المناطق الزمنية
+    const timezones = [
+      // الشرق الأوسط
+      { name: 'الرياض (السعودية)', timezone: 'Asia/Riyadh', region: 'middle-east', offset: '+03:00' },
+      { name: 'دبي (الإمارات)', timezone: 'Asia/Dubai', region: 'middle-east', offset: '+04:00' },
+      { name: 'الكويت', timezone: 'Asia/Kuwait', region: 'middle-east', offset: '+03:00' },
+      { name: 'بغداد (العراق)', timezone: 'Asia/Baghdad', region: 'middle-east', offset: '+03:00' },
+      { name: 'القاهرة (مصر)', timezone: 'Africa/Cairo', region: 'middle-east', offset: '+02:00' },
+      
+      // آسيا
+      { name: 'طوكيو (اليابان)', timezone: 'Asia/Tokyo', region: 'asia', offset: '+09:00' },
+      { name: 'بانكوك (تايلاند)', timezone: 'Asia/Bangkok', region: 'asia', offset: '+07:00' },
+      { name: 'سنغافورة', timezone: 'Asia/Singapore', region: 'asia', offset: '+08:00' },
+      { name: 'دلهي (الهند)', timezone: 'Asia/Kolkata', region: 'asia', offset: '+05:30' },
+      { name: 'هونج كونج', timezone: 'Asia/Hong_Kong', region: 'asia', offset: '+08:00' },
+      { name: 'شنغهاي (الصين)', timezone: 'Asia/Shanghai', region: 'asia', offset: '+08:00' },
+      { name: 'إسطنبول (تركيا)', timezone: 'Europe/Istanbul', region: 'middle-east', offset: '+03:00' },
+      
+      // أوروبا
+      { name: 'لندن (بريطانيا)', timezone: 'Europe/London', region: 'europe', offset: '+01:00' },
+      { name: 'باريس (فرنسا)', timezone: 'Europe/Paris', region: 'europe', offset: '+02:00' },
+      { name: 'برلين (ألمانيا)', timezone: 'Europe/Berlin', region: 'europe', offset: '+02:00' },
+      { name: 'موسكو (روسيا)', timezone: 'Europe/Moscow', region: 'europe', offset: '+03:00' },
+      
+      // الأمريكتان
+      { name: 'نيويورك (أمريكا)', timezone: 'America/New_York', region: 'americas', offset: '-04:00' },
+      { name: 'لوس أنجلوس (أمريكا)', timezone: 'America/Los_Angeles', region: 'americas', offset: '-07:00' },
+      { name: 'تورنتو (كندا)', timezone: 'America/Toronto', region: 'americas', offset: '-04:00' },
+      { name: 'ساو باولو (البرازيل)', timezone: 'America/Sao_Paulo', region: 'americas', offset: '-03:00' },
+      
+      // أخرى
+      { name: 'سيدني (أستراليا)', timezone: 'Australia/Sydney', region: 'asia', offset: '+10:00' },
+    ];
+
+    let timeFormat = '24'; // 24 أو 12
+    let currentFilter = 'all';
+
+    // إنشاء عناصر الساعات
+    function createClocks() {
+      const grid = document.getElementById('clocksGrid');
+      grid.innerHTML = '';
+      
+      const filtered = timezones.filter(tz => currentFilter === 'all' || tz.region === currentFilter);
+      
+      filtered.forEach((tz, index) => {
+        const card = document.createElement('div');
+        card.className = 'clock-card';
+        card.id = `clock-${index}`;
+        card.innerHTML = `
+          <div class="timezone-name">${tz.name}</div>
+          <div class="analog-clock">
+            <div class="clock-center"></div>
+            <div class="hand hour-hand" id="hour-${index}"></div>
+            <div class="hand minute-hand" id="minute-${index}"></div>
+            <div class="hand second-hand" id="second-${index}"></div>
+          </div>
+          <div class="digital-time" id="time-${index}">00:00:00</div>
+          <div class="time-details" id="details-${index}"></div>
+          <div class="timezone-offset">${tz.timezone}</div>
+        `;
+        grid.appendChild(card);
+      });
+      
+      updateAllClocks();
+    }
+
+    // تحديث جميع الساعات
+    function updateAllClocks() {
+      const filtered = timezones.filter(tz => currentFilter === 'all' || tz.region === currentFilter);
+      
+      filtered.forEach((tz, index) => {
+        updateClock(tz, index);
+      });
+      
+      // تحديث الوقت المحلي
+      updateLocalTime();
+    }
+
+    // تحديث ساعة واحدة
+    function updateClock(tz, index) {
+      try {
+        const now = new Date();
+        
+        // الحصول على الوقت في المنطقة الزمنية المحددة
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: tz.timezone,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
+        
+        const parts = formatter.formatToParts(now);
+        let hour = parseInt(parts.find(p => p.type === 'hour').value);
+        const minute = parseInt(parts.find(p => p.type === 'minute').value);
+        const second = parseInt(parts.find(p => p.type === 'second').value);
+        
+        // تحديث الوقت الرقمي
+        let timeString;
+        if (timeFormat === '12') {
+          const ampm = hour >= 12 ? 'مساءً' : 'صباحاً';
+          hour = hour % 12 || 12;
+          timeString = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')} ${ampm}`;
+        } else {
+          timeString = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
+        }
+        
+        document.getElementById(`time-${index}`).textContent = timeString;
+        
+        // تحديث تفاصيل الوقت
+        const dayNames = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        const localDate = new Date(now.toLocaleString('en-US', { timeZone: tz.timezone }));
+        const dayName = dayNames[localDate.getDay()];
+        const dateStr = localDate.toLocaleDateString('ar-SA');
+        
+        document.getElementById(`details-${index}`).innerHTML = `
+          <div>${dayName}</div>
+          <div>${dateStr}</div>
+        `;
+        
+        // تحديث عقارب الساعة التناظرية
+        const hourDegrees = (hour % 12) * 30 + minute * 0.5;
+        const minuteDegrees = minute * 6 + second * 0.1;
+        const secondDegrees = second * 6;
+        
+        document.getElementById(`hour-${index}`).style.transform = `rotate(${hourDegrees}deg)`;
+        document.getElementById(`minute-${index}`).style.transform = `rotate(${minuteDegrees}deg)`;
+        document.getElementById(`second-${index}`).style.transform = `rotate(${secondDegrees}deg)`;
+        
+      } catch (error) {
+        console.error(`خطأ في تحديث الساعة ${tz.name}:`, error);
+      }
+    }
+
+    // تحديث الوقت المحلي
+    function updateLocalTime() {
+      const now = new Date();
+      
+      // الوقت المحلي
+      let hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+      
+      let timeString;
+      if (timeFormat === '12') {
+        const ampm = hours >= 12 ? 'مساءً' : 'صباحاً';
+        hours = hours % 12 || 12;
+        timeString = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} ${ampm}`;
+      } else {
+        timeString = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+      
+      document.getElementById('localTime').textContent = timeString;
+      
+      // التاريخ
+      const dateStr = now.toLocaleDateString('ar-SA');
+      document.getElementById('dateDisplay').textContent = dateStr;
+      
+      // المنطقة الزمنية الحالية
+      const timezoneName = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      document.getElementById('currentTimezone').textContent = timezoneName;
+      
+      // الفرق عن UTC
+      const offset = -now.getTimezoneOffset();
+      const hours_offset = Math.floor(Math.abs(offset) / 60);
+      const minutes_offset = Math.abs(offset) % 60;
+      const sign = offset >= 0 ? '+' : '-';
+      const offsetStr = `${sign}${String(hours_offset).padStart(2, '0')}:${String(minutes_offset).padStart(2, '0')}`;
+      document.getElementById('utcOffset').textContent = offsetStr;
+    }
+
+    // تعيين صيغة الوقت
+    function setFormat(format) {
+      timeFormat = format;
+      document.querySelectorAll('.format-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      updateAllClocks();
+    }
+
+    // تصفية المناطق الزمنية
+    function filterTimezones(region) {
+      currentFilter = region;
+      document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      createClocks();
+    }
+
+    // تحديث كل ثانية
+    setInterval(updateAllClocks, 1000);
+
+    // الدخول الأولي
+    createClocks();
+  </script>
+</body>
+</html>
